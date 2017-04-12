@@ -1,0 +1,6 @@
+Point{id=id29, cat=RESTAURANT, lat=-35.7986049109, lon=144.599045548}/Users/admin/Documents/workspace/AlgorithmAssignment/outputold.txt
+Point{id=id29, cat=RESTAURANT, lat=-35.7986049109, lon=144.599045548}
+false
+true
+false
+false
