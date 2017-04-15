@@ -21,16 +21,14 @@ public class KDTreeNN implements NearestNeigh{
 	
 	private class Node {
 		private Point key;
-		private Point val;
-		private Node left, right;
-		private boolean isHorizontal = false;
+		private Node parent, left, right;
+		private boolean bXDim = true;
 		
-		public Node(Point key, Point val, Node left, Node right, boolean isHorizontal){
+		public Node(Point key, Node left, Node right, boolean bXDim){
 			this.key = key;
-			this.val = val;
             this.left = left;
             this.right = right;
-            this.isHorizontal = isHorizontal;
+            this.bXDim = bXDim;
 		}
 	}
 	
@@ -142,12 +140,15 @@ public class KDTreeNN implements NearestNeigh{
     private void printNode(Node root2) {
     	if(root2 != null){
     		System.out.println(root2.key.id + "   " + root2.key.lat + "   "  + root2.key.lon);
+    		if (root2.parent != null){
+    		//	System.out.println( "  and my parent is : " + root2.parent.key.id);
+    		}
     		if (root2.right != null ) {
-        		System.out.println("to the right    " + root2.right.key.id + "   " + root2.right.key.lat + "   "  + root2.right.key.lon);
+        		System.out.println("to the right    " + root2.right.key.id + "   " + root2.right.key.lat + "   "  + root2.right.key.lon + " and my parent is : " + root2.right.parent.key.id );
 
     		}
     		if (root2.left != null) {
-        		System.out.println("to the left    " + root2.left.key.id + "   " + root2.left.key.lat + "   "  + root2.left.key.lon);
+        		System.out.println("to the left    " + root2.left.key.id + "   " + root2.left.key.lat + "   "  + root2.left.key.lon  + " and my parent is : " + root2.left.parent.key.id);
     		}
     	
     	
@@ -174,9 +175,10 @@ public class KDTreeNN implements NearestNeigh{
     	int medianIndex = points.size() / 2;
     	System.out.println("the median is :  "+ medianIndex);
     	
-    	Node currParent = new Node(points.get(medianIndex),null, null, null , true);
+    	Node currParent = new Node(points.get(medianIndex), null, null , bXDim);
     	Node leftChild = null;
     	Node rightChild = null;
+    	currParent.parent = null;
     	
     	int leftIndex = medianIndex-1;
     	int rightIndex = medianIndex+1;
@@ -189,6 +191,7 @@ public class KDTreeNN implements NearestNeigh{
         	boolean leftflip ;
         	if(bXDim == true) leftflip = false; else leftflip = true;
             leftChild = buildTree(leftPartition, leftflip); 
+            leftChild.parent = currParent;
 
         }
         // check if there is a right partition 
@@ -198,6 +201,8 @@ public class KDTreeNN implements NearestNeigh{
         	boolean rightflip;
         	if(bXDim == true) rightflip = false; else rightflip = true;
             rightChild = buildTree(rightPartition,rightflip); 
+            rightChild.parent = currParent;
+
 
         }
 //    	if (points.size() == 1) {
@@ -307,22 +312,26 @@ public class KDTreeNN implements NearestNeigh{
     private Node addNode(Node node, Point point, boolean bXDim){
     	
     	if (node == null) {
-    		return new Node(point, null, null , null , true);
+    		return new Node(point, null , null , bXDim);
     	}
     	if (bXDim){
     		if (point.lat > node.key.lat) {
     			node.right = addNode(node.right, point, false);
+    			node.right.parent = node;
     		}
     		else if(point.lat < node.key.lat){
     			node.left = addNode(node.left, point, false);
+    			node.left.parent = node;
     		}
     	}
     	if (!bXDim){
     		if (point.lon > node.key.lon) {
     			node.right = addNode(node.right, point, true);
+    			node.right.parent = node;
     		}
     		else if(point.lon < node.key.lon) {
     			node.left = addNode(node.left, point, true);
+    			node.left.parent = node;
     		}
     	}
     	
@@ -350,17 +359,41 @@ public class KDTreeNN implements NearestNeigh{
     @Override
     public boolean deletePoint(Point point) {
         // To be implemented.
+    	System.out.println("Delete Method Starting");
     	Node toDelete = getTarget(root,point,true);
 
+    	if (toDelete.right == null && toDelete.left == null){
+    		if (toDelete.key.equals(toDelete.parent.left.key)){
+    			toDelete.parent.left = null;
+    			return true;
+    		}
+    		else if (toDelete.key.equals(toDelete.parent.right.key)){
+    			toDelete.parent.right = null;
+    			return true;
+    		}
+    	}
+    	
     	List<Point> children = new ArrayList<Point>();
     	children = getChildren(toDelete);
 
-    	Node replace = buildTree(children,false);
-    	System.out.println(replace.right.key.toString());
-    	System.out.println(toDelete.right.key.toString());
+    	System.out.println(children.toString());
+    	Node replace = buildTree(children,toDelete.bXDim);
+    	
+    	System.out.println("Finished building new tree");
 
-    	toDelete = replace;
-    	System.out.println(toDelete.right.key.toString());
+    	if (toDelete.key.equals(toDelete.parent.left.key)){
+        	System.out.println(toDelete.parent.left.key.id);
+        	System.out.println(replace.key.id);
+        	replace.parent = toDelete.parent;
+    		toDelete.parent.left = replace;
+        	System.out.println(toDelete.parent.left.key.id);
+
+    	}
+    	else if(toDelete.key.equals(toDelete.parent.right.key)){
+        	System.out.println(toDelete.parent.right.key.id);
+    		toDelete.parent.right = replace;
+    	}
+    	
     	
         System.out.println("Printing Tree after delete"); 
      	printNode(root);
@@ -420,23 +453,22 @@ public class KDTreeNN implements NearestNeigh{
     		}
     	}
     	
-    	
     	return target;
     }
 
     @Override
     public boolean isPointIn(Point point) {
 
-        Node node = root;
-        while (node != null) {
-            if (node.key.lat == point.lat && node.key.lon == point.lon) {
-                return true;
-            } else if ((!node.isHorizontal && node.key.lat >= point.lat) || (node.isHorizontal && node.key.lon >= point.lon)) {
-                node = node.left;
-            } else {
-                node = node.right;
-            }
-        }
+//        Node node = root;
+//        while (node != null) {
+//            if (node.key.lat == point.lat && node.key.lon == point.lon) {
+//                return true;
+//            } else if ((!node.isHorizontal && node.key.lat >= point.lat) || (node.isHorizontal && node.key.lon >= point.lon)) {
+//                node = node.left;
+//            } else {
+//                node = node.right;
+//            }
+//        }
         return false;
     }
 
