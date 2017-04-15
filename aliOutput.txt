@@ -1,0 +1,9 @@
+Point{id=id166, cat=RESTAURANT, lat=-35.2565183711, lon=145.251438734}
+Delete point failed.
+Point{id=id166, cat=RESTAURANT, lat=-35.2565183711, lon=145.251438734}
+Delete point failed.
+false
+true
+Delete point failed.
+true
+true
