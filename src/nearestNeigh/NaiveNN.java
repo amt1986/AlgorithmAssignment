@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class is required to be implemented.  Naive approach implementation.
+ * This class is implemented as part of RMIT Algorithm assignment.
+ * 
+ * Students : Ali AlTuraish and Sultan AlRawahi
  *
  * @author Jeffrey, Youhan
  */
@@ -13,21 +15,25 @@ public class NaiveNN implements NearestNeigh{
 	private  List<Point> list = new ArrayList<Point>();
 	
 	
-	
+	/**
+	 * This method to store the points in an arraylist
+	 */
     @Override
     public void buildIndex(List<Point> points) {
-        // To be implemented.
     	this.list = points;
 
     }
 
+    /**
+     * this method is used to search for the nearest neighbors
+     */
     @Override
     public List<Point> search(Point searchTerm, int k) {
-        // To be implemented.
-        List<Point> neighbors = new ArrayList<Point>();
+
+    	List<Point> neighbors = new ArrayList<Point>();
         List<Point> tempList = new ArrayList(list);
 
-        
+        // brute force checking
     	for (int i = 0; i<k; i++){
     		
             Point nearestNeighbor = null;
@@ -50,27 +56,33 @@ public class NaiveNN implements NearestNeigh{
         return neighbors;
     }
 
+    /**
+     * this is to add a new point to the structure
+     */
     @Override
     public boolean addPoint(Point point) {
-        // To be implemented.
     	if (isPointIn(point)){
     		return false;
     	}
     	return list.add(point);
     }
 
+    /**
+     * this is to delete a point from the structure
+     */
     @Override
     public boolean deletePoint(Point point) {
-        // To be implemented.
     	if (!isPointIn(point)){
     		return false;
     	}
     	return list.remove(point);
     }
 
+    /**
+     * this is to check that a point exists.
+     */
     @Override
     public boolean isPointIn(Point point) {
-        // To be implemented.
     	return list.contains(point);
     }
 
