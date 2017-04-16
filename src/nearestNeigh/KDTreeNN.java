@@ -16,7 +16,7 @@ import java.util.TreeSet;
 public class KDTreeNN implements NearestNeigh{
 
 	
-	private  List<Point> list = new ArrayList<Point>();
+	//private  List<Point> list = new ArrayList<Point>();
 
 	
 	private Node root;
@@ -24,7 +24,7 @@ public class KDTreeNN implements NearestNeigh{
 	private Node restRoot;
 	private Node eduRoot;
 	
-	private int size;
+	//private int size;
 	
 	private class Node {
 		private Point key;
@@ -85,20 +85,20 @@ public class KDTreeNN implements NearestNeigh{
 	}
 	
     // construct an empty set of points
-	public KDTreeNN() {
-		root = null;
-		size = 0;
-	}
+//	public KDTreeNN() {
+//		root = null;
+//		size = 0;
+//	}
 	
 	 // is the set empty?
-    public boolean isEmpty() {
-        return size == 0;
-    }
-    
+//    public boolean isEmpty() {
+//        return size == 0;
+//    }
+//    
     // number of points in the set
-    public int size() {
-       return size;
-    }
+//    public int size() {
+//       return size;
+//    }
     
 
     
@@ -152,66 +152,11 @@ public class KDTreeNN implements NearestNeigh{
     	eduRoot = buildTree(education,true);
         root = buildTree(points, true); 
 
-        
-        
-       // Point //
-        
-    //    S hospital -36.40 145.0 2
-        
-      //  Point{id=id1167, cat=HOSPITAL, lat=-36.4355438275, lon=145.032232726}
 
-
-    //    Point{id=id1000, cat=HOSPITAL, lat=-36.5421357563, lon=144.931418298}
-   //     Point{id=id1137, cat=HOSPITAL, lat=-36.5078246006, lon=145.204107411}
-       
-        Point A = new Point("id1167", hos, -36.40, 145.0);
-        Point B = new Point("id1000", hos, -36.5421357563, 144.931418298);
-        Point C = new Point("id1137", hos, -36.5078246006, 145.204107411);
-
-        System.out.println("the distance is");
-        System.out.println(A.distTo(B));
-        System.out.println(A.distTo(C));
-
-        
-        
-        
-    	printNode(root);
-		System.out.println("Right Node");
-
-    	printNode(root.right);
-		System.out.println("Left Node");
-
-    	printNode(root.left);
-		System.out.println("Next level right Node");
-
-    	printNode(root.right.right);
-    	printNode(root.right.left);
-
-		System.out.println("next level Left Node");
-    	printNode(root.left.right);
-    	printNode(root.left.left);
+      
     	
     }
 
-    private void printNode(Node root2) {
-    	if(root2 != null){
-    		System.out.println(root2.key.id + "   " + root2.key.lat + "   "  + root2.key.lon);
-    		if (root2.parent != null){
-    		//	System.out.println( "  and my parent is : " + root2.parent.key.id);
-    		}
-    		if (root2.right != null ) {
-        		System.out.println("to the right    " + root2.right.key.id + "   " + root2.right.key.lat + "   "  + root2.right.key.lon + " and my parent is : " + root2.right.parent.key.id );
-
-    		}
-    		if (root2.left != null) {
-        		System.out.println("to the left    " + root2.left.key.id + "   " + root2.left.key.lat + "   "  + root2.left.key.lon  + " and my parent is : " + root2.left.parent.key.id);
-    		}
-    	
-    	
-    	
-    	}
-    	
-	}
 
 	private Node buildTree(List<Point> points, boolean bXDim) {
 		// TODO Auto-generated method stub
@@ -229,7 +174,6 @@ public class KDTreeNN implements NearestNeigh{
     	Collections.sort(points, new PointComparator(dim));
     	
     	int medianIndex = points.size() / 2;
-    	System.out.println("the median is :  "+ medianIndex);
     	
     	Node currParent = new Node(points.get(medianIndex), null, null , bXDim);
     	Node leftChild = null;
@@ -253,7 +197,6 @@ public class KDTreeNN implements NearestNeigh{
         // check if there is a right partition 
         if (medianIndex < points.size()-1) {
         	List<Point> rightPartition = new ArrayList(points.subList(rightIndex, points.size()));
-        	System.out.println(rightPartition.toString() + " with size : " + rightPartition.size());
         	boolean rightflip;
         	if(bXDim == true) rightflip = false; else rightflip = true;
             rightChild = buildTree(rightPartition,rightflip); 
@@ -280,11 +223,8 @@ public class KDTreeNN implements NearestNeigh{
     
 	@Override
     public List<Point> search(Point searchTerm, int k) {
-        // To be implemented.
     	
-    //	System.out.println(root.key.id);
-    	//System.out.println(root.right.key.id);
-    	//System.out.println(root.left.key.id);
+
 
         Node node = root;
 
@@ -301,10 +241,6 @@ public class KDTreeNN implements NearestNeigh{
 
         
         Node close = getClosestPoint(searchTerm, node, true);
-     //   System.out.println("Result  " + close.key.id);
-        Point nearestPoint = close.key;
-        System.out.println("The closest point is : ");
-        System.out.println(nearestPoint.toString());
         
         if (close != null) {
             // Used to not re-examine nodes
@@ -354,25 +290,20 @@ public class KDTreeNN implements NearestNeigh{
     	if (xDim){
         	if (p.lat > n.key.lat) {
         		if (n.right == null) return n;
-            	System.out.println("going right from x " + n.key.id );
         		Closest = getClosestPoint(p, n.right, false);
         	}
         	if (p.lat < n.key.lat){
         		if (n.left == null) return n;
-            	System.out.println("going left from x " + n.key.id);
-
         		Closest = getClosestPoint(p, n.left, false);
         	}
     	}
     	else if(!xDim){
         	if (p.lon > n.key.lon ){
         		if (n.right == null) return n;
-            	System.out.println("going right from y " + n.key.id);
         		Closest = getClosestPoint(p,n.right, true);
         	}
         	if (p.lon < n.key.lon) {
         		if (n.left == null) return n;
-            	System.out.println("going left from x " + n.key.id);
         		Closest = getClosestPoint(p,n.left, true);
         	}
     	}
@@ -496,22 +427,7 @@ public class KDTreeNN implements NearestNeigh{
     	
          root = addNode(addRoot, point, true);
         
-        System.out.println("Printing Tree after add"); 
-     	printNode(root);
- 		System.out.println("Right Node");
 
-     	printNode(root.right);
- 		System.out.println("Left Node");
-
-     	printNode(root.left);
- 		System.out.println("Next level right Node");
-
-     	printNode(root.right.right);
-     	printNode(root.right.left);
-
- 		System.out.println("next level Left Node");
-     	printNode(root.left.right);
-     	printNode(root.left.left);
     	
         return true;
     }
@@ -578,12 +494,10 @@ public class KDTreeNN implements NearestNeigh{
     		deleteRoot = eduRoot;
     	}
     	
-    	System.out.println("Delete Method Starting");
     	Node toDelete = getTarget(deleteRoot,point,true);
     	
-    	
+    	// return false if the point is not available
     	if(toDelete == null){
-    		System.out.println("Point Not Available");
     		return false;
     	}
 
@@ -604,10 +518,8 @@ public class KDTreeNN implements NearestNeigh{
     	List<Point> children = new ArrayList<Point>();
     	children = getChildren(toDelete);
 
-    	System.out.println(children.toString());
     	Node replace = buildTree(children,toDelete.bXDim);
     	
-    	System.out.println("Finished building new tree");
 
     	if (toDelete.key.equals(toDelete.parent.left.key)){
         	replace.parent = toDelete.parent;
@@ -618,24 +530,7 @@ public class KDTreeNN implements NearestNeigh{
     		toDelete.parent.right = replace;
     	}
     	
-    	
-        System.out.println("Printing Tree after delete"); 
-     	printNode(root);
- 		System.out.println("Right Node");
 
-     	printNode(root.right);
- 		System.out.println("Left Node");
-
-     	printNode(root.left);
- 		System.out.println("Next level right Node");
-
-     	printNode(root.right.right);
-     	printNode(root.right.left);
-
- 		System.out.println("next level Left Node");
-     	printNode(root.left.right);
-     	printNode(root.left.left);
-     	
      	
         return true;
        
