@@ -1,0 +1,2 @@
+Point{id=id6, cat=EDUCATION, lat=12.0, lon=7.0}
+Point{id=id1, cat=RESTAURANT, lat=15.0, lon=9.0}

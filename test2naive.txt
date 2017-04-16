@@ -1,0 +1,13 @@
+Point{id=id1167, cat=HOSPITAL, lat=-36.4355438275, lon=145.032232726}
+Point{id=id1000, cat=HOSPITAL, lat=-36.5421357563, lon=144.931418298}
+Point{id=id1137, cat=HOSPITAL, lat=-36.5078246006, lon=145.204107411}
+Point{id=id1166, cat=HOSPITAL, lat=-36.5776927824, lon=145.132020258}
+Point{id=id1015, cat=HOSPITAL, lat=-36.578680492, lon=144.714220994}
+Point{id=id1117, cat=HOSPITAL, lat=-36.7239307024, lon=144.675087327}
+Point{id=id1056, cat=HOSPITAL, lat=-36.5860220403, lon=144.47680286}
+Point{id=id1046, cat=HOSPITAL, lat=-36.9441540614, lon=144.889268692}
+Point{id=id1178, cat=HOSPITAL, lat=-36.974950605, lon=144.88946288}
+Point{id=id1114, cat=HOSPITAL, lat=-36.9509849724, lon=144.725003929}
+Point{id=id1000, cat=HOSPITAL, lat=-36.5421357563, lon=144.931418298}
+Delete point failed.
+true

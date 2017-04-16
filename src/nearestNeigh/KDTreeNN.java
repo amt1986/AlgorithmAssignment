@@ -3,7 +3,10 @@ package nearestNeigh;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * This class is required to be implemented.  Kd-tree implementation.
@@ -17,6 +20,10 @@ public class KDTreeNN implements NearestNeigh{
 
 	
 	private Node root;
+	private Node hospitalRoot;
+	private Node restRoot;
+	private Node eduRoot;
+	
 	private int size;
 	
 	private class Node {
@@ -109,6 +116,7 @@ public class KDTreeNN implements NearestNeigh{
 	
     @Override
     public void buildIndex(List<Point> points) {
+
         // To be implemented.
     	//this.list = points;
     	//for ( int i = 0; i< list.size();i++){
@@ -117,8 +125,56 @@ public class KDTreeNN implements NearestNeigh{
          //   Collections.sort(list, c);
     	//}
     	
+
+    	
+        Category hos = Point.parseCat("HOSPITAL");
+        Category rest = Point.parseCat("RESTAURANT");
+        Category edu = Point.parseCat("EDUCATION")	;	 
+    	List<Point> hospitals = new ArrayList<Point>();
+    	List<Point> restaurants = new ArrayList<Point>();
+    	List<Point> education = new ArrayList<Point>();
+
+    	
+    	for (Point p: points ){
+    		if (p.cat == hos){
+    			hospitals.add(p);
+    		}
+    		if (p.cat == rest){
+    			restaurants.add(p);
+    		}
+    		if (p.cat == edu){
+    			education.add(p);
+    		}
+    	}
+    	
+    	hospitalRoot = buildTree(hospitals,true);
+    	restRoot = buildTree(restaurants, true);
+    	eduRoot = buildTree(education,true);
         root = buildTree(points, true); 
 
+        
+        
+       // Point //
+        
+    //    S hospital -36.40 145.0 2
+        
+      //  Point{id=id1167, cat=HOSPITAL, lat=-36.4355438275, lon=145.032232726}
+
+
+    //    Point{id=id1000, cat=HOSPITAL, lat=-36.5421357563, lon=144.931418298}
+   //     Point{id=id1137, cat=HOSPITAL, lat=-36.5078246006, lon=145.204107411}
+       
+        Point A = new Point("id1167", hos, -36.40, 145.0);
+        Point B = new Point("id1000", hos, -36.5421357563, 144.931418298);
+        Point C = new Point("id1137", hos, -36.5078246006, 145.204107411);
+
+        System.out.println("the distance is");
+        System.out.println(A.distTo(B));
+        System.out.println(A.distTo(C));
+
+        
+        
+        
     	printNode(root);
 		System.out.println("Right Node");
 
@@ -230,19 +286,63 @@ public class KDTreeNN implements NearestNeigh{
     	//System.out.println(root.right.key.id);
     	//System.out.println(root.left.key.id);
 
-    	
+        Node node = root;
+
+    	if ( searchTerm.cat == Point.parseCat("HOSPITAL")){
+    		node = hospitalRoot;
+    	}
+    	if ( searchTerm.cat == Point.parseCat("RESTAURANT")){
+    		node = restRoot;
+    	}
+    	if ( searchTerm.cat == Point.parseCat("EDUCATION")){
+    		node = eduRoot;
+    	}
+        TreeSet<Node> results = new TreeSet<Node>(new DistanceComparator(searchTerm));
+
         
-        Node close = getClosestPoint(searchTerm, root, true);
+        Node close = getClosestPoint(searchTerm, node, true);
      //   System.out.println("Result  " + close.key.id);
         Point nearestPoint = close.key;
+        System.out.println("The closest point is : ");
+        System.out.println(nearestPoint.toString());
+        
+        if (close != null) {
+            // Used to not re-examine nodes
+            Set<Node> checked = new HashSet<Node>();
+
+            // Go up the tree, looking for better solutions
+            node = close;
+            while (node != null) {
+                // Search node
+//                if(results.size() > 0){
+//                	for (Node result : results){
+//                		if (result.key.cat != searchTerm.cat){
+//                			results.remove(result);
+//                		}
+//                		
+//                	}
+////                	Node lastNode = results.last();
+////                	if (lastNode.key.cat != searchTerm.cat){
+////                		results.remove(lastNode);
+////                		results.
+////                	}
+//                }
+                searchNode(searchTerm, node, k, results, checked);
+                node = node.parent;
+            }
+        }
+
 
         
         
         List<Point> neighbors = new ArrayList<Point>();
-        neighbors.add(nearestPoint);
+        
+        // Load up the collection of the results
+       // Collection<T> collection = new ArrayList<T>(K);
+        for (Node kdNode : results)
+            neighbors.add(kdNode.key);
         
    // 	System.out.println("Size is : " + size);
-    	System.out.println(neighbors.toString());
         return neighbors;
     }
     
@@ -282,11 +382,119 @@ public class KDTreeNN implements NearestNeigh{
     	return Closest;
     	
     }
+    
+    
+    private static final  void searchNode(Point value, Node node, int K, TreeSet<Node> results, Set<Node> examined) {
+        examined.add(node);
+
+//        if(results.size() > 0){
+//        	if (results.last().key.cat != value.cat){
+//        		results.remove(results.last());
+//        	}
+//        }
+        
+        // Search node
+        Node lastNode = null;
+        Double lastDistance = Double.MAX_VALUE;
+        if (results.size() > 0) {
+            lastNode = results.last();
+            lastDistance = lastNode.key.distTo(value);
+        }
+        Double nodeDistance = node.key.distTo(value);
+        if (nodeDistance.compareTo(lastDistance) < 0) {
+            if (results.size() == K && lastNode != null){
+                results.remove(lastNode);
+            }
+//            if (node.key.cat == value.cat){
+//                results.add(node);
+//            }
+            results.add(node);
+        } else if (nodeDistance.equals(lastDistance)) {
+//            if (node.key.cat == value.cat){
+//                results.add(node);
+//            }
+            results.add(node);
+        } else if (results.size() < K) {
+//            if (node.key.cat == value.cat){
+//                results.add(node);
+//            }
+            results.add(node);
+        }
+        if (results.size() > 0){
+            lastNode = results.last();
+            lastDistance = lastNode.key.distTo(value);
+
+        }
+
+        boolean xAxis = node.bXDim;
+        Node lesser = node.left;
+        Node greater = node.right;
+
+        // Search children branches, if axis aligned distance is less than
+        // current distance
+        if (lesser != null && !examined.contains(lesser)) {
+            examined.add(lesser);
+
+            double nodePoint = Double.MIN_VALUE;
+            double valuePlusDistance = Double.MIN_VALUE;
+            if (xAxis) {
+                nodePoint = node.key.lat;
+                valuePlusDistance = value.lat - lastDistance;
+            } else if (!xAxis) {
+                nodePoint = node.key.lon;
+                valuePlusDistance = value.lon - lastDistance;
+            } 
+            boolean lineIntersectsCube = ((valuePlusDistance <= nodePoint) ? true : false);
+
+            // Continue down lesser branch
+            if (lineIntersectsCube)
+                searchNode(value, lesser, K, results, examined);
+        }
+        if (greater != null && !examined.contains(greater)) {
+            examined.add(greater);
+
+            double nodePoint = Double.MIN_VALUE;
+            double valuePlusDistance = Double.MIN_VALUE;
+            if (xAxis) {
+                nodePoint = node.key.lat;
+                valuePlusDistance = value.lat + lastDistance;
+            } else if (!xAxis) {
+                nodePoint = node.key.lon;
+                valuePlusDistance = value.lon + lastDistance;
+            } 
+            boolean lineIntersectsCube = ((valuePlusDistance >= nodePoint) ? true : false);
+
+            // Continue down greater branch
+            if (lineIntersectsCube)
+                searchNode(value, greater, K, results, examined);
+        }
+    }
+    
+    
+    
+    
 
     @Override
     public boolean addPoint(Point point) {
         // To be implemented.
-         root = addNode(root, point, true);
+    	Node addRoot = root;
+    	if ( point.cat == Point.parseCat("HOSPITAL")){
+    		addRoot = hospitalRoot;
+    	}
+    	if ( point.cat == Point.parseCat("RESTAURANT")){
+    		addRoot = restRoot;
+    	}
+    	if ( point.cat == Point.parseCat("EDUCATION")){
+    		addRoot = eduRoot;
+    	}
+    	
+    	Node n = getTarget(addRoot,point,true);
+    	if ( n != null ){
+    		return false;
+    	}
+    	
+    	
+         root = addNode(addRoot, point, true);
         
         System.out.println("Printing Tree after add"); 
      	printNode(root);
@@ -359,14 +567,34 @@ public class KDTreeNN implements NearestNeigh{
     @Override
     public boolean deletePoint(Point point) {
         // To be implemented.
+    	Node deleteRoot = root;
+    	if ( point.cat == Point.parseCat("HOSPITAL")){
+    		deleteRoot = hospitalRoot;
+    	}
+    	if ( point.cat == Point.parseCat("RESTAURANT")){
+    		deleteRoot = restRoot;
+    	}
+    	if ( point.cat == Point.parseCat("EDUCATION")){
+    		deleteRoot = eduRoot;
+    	}
+    	
     	System.out.println("Delete Method Starting");
-    	Node toDelete = getTarget(root,point,true);
+    	Node toDelete = getTarget(deleteRoot,point,true);
+    	
+    	
+    	if(toDelete == null){
+    		System.out.println("Point Not Available");
+    		return false;
+    	}
 
     	if (toDelete.right == null && toDelete.left == null){
-    		if (toDelete.key.equals(toDelete.parent.left.key)){
-    			toDelete.parent.left = null;
-    			return true;
+    		if (toDelete.parent.left != null){
+        		if (toDelete.key.equals(toDelete.parent.left.key)){
+        			toDelete.parent.left = null;
+        			return true;
+        		}
     		}
+
     		else if (toDelete.key.equals(toDelete.parent.right.key)){
     			toDelete.parent.right = null;
     			return true;
@@ -382,15 +610,11 @@ public class KDTreeNN implements NearestNeigh{
     	System.out.println("Finished building new tree");
 
     	if (toDelete.key.equals(toDelete.parent.left.key)){
-        	System.out.println(toDelete.parent.left.key.id);
-        	System.out.println(replace.key.id);
         	replace.parent = toDelete.parent;
     		toDelete.parent.left = replace;
-        	System.out.println(toDelete.parent.left.key.id);
-
     	}
     	else if(toDelete.key.equals(toDelete.parent.right.key)){
-        	System.out.println(toDelete.parent.right.key.id);
+    		toDelete.parent.right = replace;
     		toDelete.parent.right = replace;
     	}
     	
@@ -432,6 +656,8 @@ public class KDTreeNN implements NearestNeigh{
     }
     
     public Node getTarget(Node root, Point point, boolean bXDim){
+    	
+    	if(root == null) return null;
     	Node target = null;
     	if (root.key.equals(point)){
     		return root;
@@ -459,6 +685,11 @@ public class KDTreeNN implements NearestNeigh{
     @Override
     public boolean isPointIn(Point point) {
 
+    	Node n = getTarget(root, point, true);
+    	
+    	if ( n == null) {
+    		return false;
+    	}
 //        Node node = root;
 //        while (node != null) {
 //            if (node.key.lat == point.lat && node.key.lon == point.lon) {
@@ -469,9 +700,35 @@ public class KDTreeNN implements NearestNeigh{
 //                node = node.right;
 //            }
 //        }
-        return false;
+        return true;
     }
 
+    
+    
+    
+    protected static class DistanceComparator implements Comparator<Node> {
+
+        private final Point point;
+
+        public DistanceComparator(Point point) {
+            this.point = point;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public int compare(Node o1, Node o2) {
+            Double d1 = point.distTo(o1.key);
+            Double d2 = point.distTo(o2.key);
+            if (d1.compareTo(d2) < 0)
+                return -1;
+            else if (d2.compareTo(d1) < 0)
+                return 1;
+          //  return o1.id.compareTo(o2.id);
+          return 0;
+        }
+    }
     
     
 }
